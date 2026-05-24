@@ -1,0 +1,120 @@
+# golangci-lint v2 configuration.
+#
+# Mirrors github.com/shields/right-answers/.golangci.yml: enable all
+# linters and curate exclusions. Local additions (if any) are commented.
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+  build-tags:
+    - integration
+
+linters:
+  default: all
+  disable:
+    - depguard
+    - exhaustruct
+    - funlen
+    - godox
+    - wsl
+    - wrapcheck
+    - varnamelen
+    - ireturn
+    - exhaustive
+    - gochecknoglobals
+    - tagliatelle
+    - cyclop
+    - gocognit
+    - gocyclo
+    - nestif
+    - mnd
+    - nlreturn
+    - wsl_v5 # Too opinionated about whitespace
+    - testpackage # Tests in same package are fine
+    - noctx # Not all functions need context
+    - noinlineerr # Inline errors are often clearer
+    - nonamedreturns # Named returns aid clarity; nakedret covers the bug risk
+    - gomodguard # Deprecated in golangci-lint v2.12; gomodguard_v2 is auto-enabled by default: all
+
+  settings:
+    funcorder:
+      struct-method: false # Allow placing helper methods near callers
+
+    dupl:
+      threshold: 150
+
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+
+    goconst:
+      ignore-tests: true
+
+    exhaustive:
+      default-signifies-exhaustive: true
+
+    godot:
+      scope: declarations
+
+    gosec:
+      severity: medium
+      confidence: medium
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+
+    lll:
+      line-length: 120
+
+    misspell:
+      locale: US
+
+    nakedret:
+      max-func-lines: 30
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: line-length-limit
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: add-constant
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: cyclomatic
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: banned-characters
+          disabled: true
+        - name: file-header
+          disabled: true
+        - name: unhandled-error
+          disabled: true # Subset of errcheck
+
+    staticcheck:
+      checks: ["all"]
+
+  # Test HTTP handlers, cleanup functions, and table-driven literals do not
+  # benefit from error checking and security scanning, and test error values
+  # do not need to be sentinel errors.
+  exclusions:
+    rules:
+      - path: _test\.go$
+        linters:
+          - errcheck
+          - err113
+          - gosec
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

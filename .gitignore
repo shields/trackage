@@ -1,0 +1,5 @@
+.devcontainer/
+/coverage.out
+/node_modules
+/trackage
+
