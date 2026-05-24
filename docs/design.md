@@ -63,13 +63,12 @@ Each backend ships its own timestamp shape:
   Both refer to the same instant. The adapter prefers `time_iso` so the rendered
   zone matches where the scan happened.
 - **TrackingMore** — single field `c.Date`; sometimes naive
-  (`"2015-11-02 17:11"`) with no zone information. Naive strings are tagged
-  with a `time.FixedZone("local", 0)` sentinel so the CLI formatter can
-  surface them as `local` rather than mislabel them as UTC. We deliberately
-  do not use `time.UTC` (would silently imply a confirmed offset) or
-  `time.Local` (`time.Parse` aliases that whenever a parsed offset happens
-  to match the machine zone, which would mask real carrier-supplied
-  timestamps as zoneless).
+  (`"2015-11-02 17:11"`) with no zone information. Naive strings are tagged with
+  a `time.FixedZone("local", 0)` sentinel so the CLI formatter can surface them
+  as `local` rather than mislabel them as UTC. We deliberately do not use
+  `time.UTC` (would silently imply a confirmed offset) or `time.Local`
+  (`time.Parse` aliases that whenever a parsed offset happens to match the
+  machine zone, which would mask real carrier-supplied timestamps as zoneless).
 - **EasyPost** — ships **both** `datetime` and `datetime_local`. They look
   almost identical but mean different things:
   ```json

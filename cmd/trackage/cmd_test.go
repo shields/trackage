@@ -224,6 +224,7 @@ func TestTrackCmdUnknownBackend(t *testing.T) {
 
 func TestTrackCmdMissingAPIKey(t *testing.T) {
 	t.Setenv("SHIPPO_API_KEY", "")
+	withDefaultCredsStore(t, "")
 	_, stderr, code := runRoot(t, "track", "--backend=shippo", "x")
 	if code == 0 {
 		t.Fatal("expected non-zero exit")

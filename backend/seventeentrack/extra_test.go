@@ -430,7 +430,6 @@ func TestMultiProviderEventsChronological(t *testing.T) {
 		case "/track/v2.2/register":
 			_, _ = w.Write([]byte(`{"code":0,"data":{"accepted":[{"number":"x","carrier":3011}],"rejected":[]}}`))
 		case "/track/v2.2/gettrackinfo":
-			//nolint:lll // JSON test fixture; readability beats wrapping
 			_, _ = w.Write([]byte(`{
 				"code":0,
 				"data":{"accepted":[{"number":"x","carrier":3011,"track_info":{

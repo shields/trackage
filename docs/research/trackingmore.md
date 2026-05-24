@@ -228,8 +228,8 @@ update/delete/retrack.
 may show `courier_code` and `carrier_code` interchangeably — code defensively.
 
 **v4 envelope:** `data` is the **array of items directly** — the
-`{items, page, limit, total}` wrapper from v2 is gone. Pagination/total
-are not surfaced on this endpoint in v4. Observed:
+`{items, page, limit, total}` wrapper from v2 is gone. Pagination/total are not
+surfaced on this endpoint in v4. Observed:
 
 ```json
 {

@@ -115,7 +115,7 @@ func (t *Tracker) Track(ctx context.Context, carrier, number string) (*trackage.
 		return nil, err
 	}
 
-	if err := t.register(ctx, code, number); err != nil {
+	if err = t.register(ctx, code, number); err != nil {
 		return nil, err
 	}
 	info, raw, err := t.getInfo(ctx, code, number)
@@ -148,7 +148,10 @@ func (*Tracker) resolveCarrier(carrier, number string) (int, string, error) {
 		if n, err := strconv.Atoi(carrier); err == nil {
 			return n, carrier, nil
 		}
-		return 0, "", fmt.Errorf("17track: %w (%s); pass a canonical id or numeric 17Track code", trackage.ErrUnsupportedCarrier, carrier)
+		return 0, "", fmt.Errorf(
+			"17track: %w (%s); pass a canonical id or numeric 17Track code",
+			trackage.ErrUnsupportedCarrier, carrier,
+		)
 	}
 	if id := trackage.DetectCarrier(number); id != "" {
 		if c, ok := trackage.LookupCarrier(id); ok && c.SeventeenTrack != 0 {

@@ -250,7 +250,7 @@ func eraseFromCredStore(ctx context.Context, store, backendName string) error {
 // path-relative reference (skipping PATH lookup), so a value like
 // "../../bin/sh" coming from a config file would execute an arbitrary
 // binary. Validation runs at every entry point that builds a helper
-// command — there is no second line of defence.
+// command — there is no second line of defense.
 func helperBinary(store string) (string, error) {
 	if !validCredsStoreName(store) {
 		return "", fmt.Errorf("%w: %q", errInvalidCredsStore, store)

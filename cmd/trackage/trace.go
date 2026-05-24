@@ -147,7 +147,7 @@ func (b *traceBody) Read(p []byte) (int, error) {
 	return n, err
 }
 
-func (b *traceBody) Close() error { return nil }
+func (*traceBody) Close() error { return nil }
 
 func (t *traceTransport) writeHeaders(prefix string, h http.Header) {
 	keys := make([]string, 0, len(h))

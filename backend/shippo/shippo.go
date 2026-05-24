@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"sort"
 	"strings"
 	"time"
 
@@ -356,7 +355,7 @@ func extractMessage(body []byte) string {
 		for k := range fields {
 			keys = append(keys, k)
 		}
-		sort.Strings(keys)
+		slices.Sort(keys)
 		msgs := make([]string, 0, len(fields))
 		for _, k := range keys {
 			switch vv := fields[k].(type) {

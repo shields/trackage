@@ -205,6 +205,7 @@ func TestListKeysInCredStoreAutoDetectFromFake(t *testing.T) {
 
 func TestResolveAPIKeyConfigOnly(t *testing.T) {
 	t.Setenv("SHIPPO_API_KEY", "")
+	withDefaultCredsStore(t, "")
 	got, err := resolveAPIKey(context.Background(), "SHIPPO_API_KEY", "", "shippo", config{
 		APIKeys: map[string]string{"shippo": "from-config"},
 	})
@@ -215,6 +216,7 @@ func TestResolveAPIKeyConfigOnly(t *testing.T) {
 
 func TestResolveAPIKeyNoneError(t *testing.T) {
 	t.Setenv("SHIPPO_API_KEY", "")
+	withDefaultCredsStore(t, "")
 	_, err := resolveAPIKey(context.Background(), "SHIPPO_API_KEY", "", "shippo", config{})
 	if !errors.Is(err, errNoAPIKey) {
 		t.Fatalf("expected errNoAPIKey, got %v", err)

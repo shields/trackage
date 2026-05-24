@@ -1,4 +1,7 @@
 pre-commit:
+  parallel: true
   commands:
     lint:
       run: make lint
+    test:
+      run: make test

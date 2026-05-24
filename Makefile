@@ -7,7 +7,7 @@
 #     invoked through `go tool ...` so a fresh checkout needs nothing
 #     beyond a working Go toolchain.
 
-.PHONY: all build test coverage coverage-check lint lint-go lint-mod lint-md fmt fmt-go fmt-md run clean
+.PHONY: all build test coverage coverage-check lint lint-go lint-mod lint-md fmt fmt-go fmt-md hooks run clean
 
 GO ?= go
 COVERAGE_FILE ?= coverage.out
@@ -55,6 +55,9 @@ fmt-go:
 
 fmt-md:
 	bunx prettier --write '**/*.md'
+
+hooks:
+	$(GO) tool lefthook install
 
 run:
 	$(GO) run ./cmd/trackage $(ARGS)
