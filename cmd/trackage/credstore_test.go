@@ -360,7 +360,7 @@ func TestHelperBinaryRejectsPathTraversal(t *testing.T) {
 			t.Errorf("helperBinary(%q) → err=%v, want errInvalidCredsStore", store, err)
 		}
 	}
-	good := []string{"osxkeychain", "secretservice", "pass", "wincred", "file"}
+	good := []string{"osxkeychain", "secretservice", "pass", "wincred", "file", "store2", "a0_b-9"}
 	for _, store := range good {
 		if got, err := helperBinary(store); err != nil || got != "docker-credential-"+store {
 			t.Errorf("helperBinary(%q) → %q, err=%v", store, got, err)
@@ -389,5 +389,21 @@ func TestListFromCredStoreEmptyStdout(t *testing.T) {
 	}
 	if len(got) != 0 {
 		t.Errorf("expected empty map, got %v", got)
+	}
+}
+
+func TestCredStoreActionsRejectInvalidStoreName(t *testing.T) {
+	t.Parallel()
+	// store / list / erase must short-circuit on a malformed store name
+	// without ever invoking exec.Command — validation lives in
+	// helperBinary and these three entry points all delegate to it.
+	if err := storeInCredStore(context.Background(), "../../sh", "shippo", "k"); !errors.Is(err, errInvalidCredsStore) {
+		t.Errorf("store: got %v, want errInvalidCredsStore", err)
+	}
+	if _, err := listFromCredStore(context.Background(), "../../sh"); !errors.Is(err, errInvalidCredsStore) {
+		t.Errorf("list: got %v, want errInvalidCredsStore", err)
+	}
+	if err := eraseFromCredStore(context.Background(), "../../sh", "shippo"); !errors.Is(err, errInvalidCredsStore) {
+		t.Errorf("erase: got %v, want errInvalidCredsStore", err)
 	}
 }

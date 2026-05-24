@@ -4,4 +4,4 @@ pre-commit:
     lint:
       run: make lint
     test:
-      run: make test
+      run: make coverage-check

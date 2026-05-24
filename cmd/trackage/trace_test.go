@@ -322,3 +322,30 @@ func TestResolveBackendInstallsTraceClient(t *testing.T) {
 		t.Errorf("trace did not capture the upstream request:\n%s", got)
 	}
 }
+
+func TestLogResponseNil(t *testing.T) {
+	t.Parallel()
+	// Defensive nil-guard — RoundTrip won't ever call logResponse with
+	// nil, but the guard exists to keep direct callers safe.
+	var buf bytes.Buffer
+	(&traceTransport{w: &buf}).logResponse(nil)
+	if buf.Len() != 0 {
+		t.Errorf("nil response should write nothing, got %q", buf.String())
+	}
+}
+
+func TestTraceBodyExposesReadErrOnEOF(t *testing.T) {
+	t.Parallel()
+	// A traceBody that wraps a fully-buffered body but carries a
+	// readErr must re-surface that error once the buffer is drained,
+	// so the upstream sees the same failure a non-traced reader would.
+	want := errors.New("synthetic")
+	body := newTraceBody([]byte("hello"), want)
+	got, err := io.ReadAll(body)
+	if string(got) != "hello" {
+		t.Errorf("Read bytes = %q, want hello", got)
+	}
+	if !errors.Is(err, want) {
+		t.Errorf("Read err = %v, want %v re-surfaced after EOF", err, want)
+	}
+}

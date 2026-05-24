@@ -139,9 +139,13 @@ func (t *Tracker) Track(ctx context.Context, carrier, number string) (*trackage.
 	return nil, err
 }
 
+// lookupCarrier is a seam for tests; see the matching comment in the
+// easypost backend. No real carrier in the table has empty TrackingMore.
+var lookupCarrier = trackage.LookupCarrier
+
 func (*Tracker) resolveCarrier(carrier, number string) (string, error) {
 	if carrier != "" {
-		if c, ok := trackage.LookupCarrier(carrier); ok {
+		if c, ok := lookupCarrier(carrier); ok {
 			if c.TrackingMore == "" {
 				return "", fmt.Errorf("trackingmore: %w (%s)", trackage.ErrUnsupportedCarrier, carrier)
 			}
@@ -152,7 +156,7 @@ func (*Tracker) resolveCarrier(carrier, number string) (string, error) {
 		return carrier, nil
 	}
 	if id := trackage.DetectCarrier(number); id != "" {
-		if c, ok := trackage.LookupCarrier(id); ok && c.TrackingMore != "" {
+		if c, ok := lookupCarrier(id); ok && c.TrackingMore != "" {
 			return c.TrackingMore, nil
 		}
 	}
@@ -426,21 +430,30 @@ func checkpointLocation(c checkpoint) string {
 }
 
 // canonicalCarrier returns the lowercase canonical trackage id for a
-// tracking response. LookupCarrier is case-sensitive (carriersByID keys
-// are lowercase), so a user-supplied "USPS" would miss; lowercase the
-// input first so canonical-id-with-non-canonical-casing still wins.
-// The final fallback also lowercases the user's input so a non-canonical,
-// non-translated value still satisfies Tracking.Carrier's documented
-// "canonical lowercase carrier id" contract.
+// tracking response.
+//
+// The server's response courier_code wins when present: the server
+// knows what carrier this tracking number is actually bound to, and
+// the user's hint may disagree (the fallback GET path explicitly skips
+// filtering by courier_code for the same reason — see Track above).
+// A response code that maps to a canonical id is rewritten to that id;
+// an unmapped code is returned lower-cased so Tracking.Carrier still
+// satisfies its "canonical lowercase id" contract.
+//
+// With no response code we fall back to the user's hint, mapped to
+// canonical if possible. LookupCarrier is case-sensitive (carriersByID
+// keys are lowercase), so a user-supplied "USPS" is lower-cased first.
 func canonicalCarrier(userCarrier string, item *trackingItem) string {
+	if code := firstNonEmpty(item.CourierCode, item.CarrierCode); code != "" {
+		for _, c := range trackage.AllCarriers() {
+			if strings.EqualFold(c.TrackingMore, code) {
+				return c.ID
+			}
+		}
+		return strings.ToLower(code)
+	}
 	if c, ok := trackage.LookupCarrier(strings.ToLower(userCarrier)); ok {
 		return c.ID
-	}
-	code := firstNonEmpty(item.CourierCode, item.CarrierCode)
-	for _, c := range trackage.AllCarriers() {
-		if strings.EqualFold(c.TrackingMore, code) {
-			return c.ID
-		}
 	}
 	return strings.ToLower(userCarrier)
 }

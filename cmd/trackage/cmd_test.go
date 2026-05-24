@@ -320,6 +320,32 @@ func sampleTracking() *trackage.Tracking {
 	}
 }
 
+func TestFriendlyBackendError(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name   string
+		in     error
+		substr string
+	}{
+		{"not found", trackage.ErrNotFound, "tracking number not found"},
+		{"auth", trackage.ErrAuth, "authentication failed"},
+		{"rate limited", trackage.ErrRateLimited, "rate limited"},
+		{"carrier required", trackage.ErrCarrierRequired, "carrier required"},
+		{"unsupported", trackage.ErrUnsupportedCarrier, "carrier not supported"},
+		{"opaque", errors.New("boom"), "fake: boom"},
+	}
+	for _, c := range cases {
+		got := friendlyBackendError("fake", c.in)
+		if !strings.Contains(got.Error(), c.substr) {
+			t.Errorf("%s → %q, want substring %q", c.name, got, c.substr)
+		}
+		// Wrapping must preserve errors.Is for the sentinels.
+		if c.in != nil && !errors.Is(got, c.in) {
+			t.Errorf("%s: errors.Is broken", c.name)
+		}
+	}
+}
+
 func TestStatusLabel(t *testing.T) {
 	t.Parallel()
 	cases := map[trackage.Status]string{

@@ -504,3 +504,39 @@ func TestNormalizeFillsCarrierFromCode(t *testing.T) {
 		t.Errorf("Carrier = %q, want usps (filled from code 21051)", got.Carrier)
 	}
 }
+
+//nolint:paralleltest // mutates package-level lookupCarrier
+func TestUnsupportedCanonicalCarrierRejected(t *testing.T) {
+	// Real carriers all have a non-zero 17Track code, so swap the seam.
+	orig := lookupCarrier
+	t.Cleanup(func() { lookupCarrier = orig })
+	lookupCarrier = func(id string) (trackage.Carrier, bool) {
+		return trackage.Carrier{ID: id}, true
+	}
+	tr := New(Config{APIKey: "k"})
+	if _, _, err := tr.resolveCarrier("fake", "x"); !errors.Is(err, trackage.ErrUnsupportedCarrier) {
+		t.Errorf("resolveCarrier: got %v, want ErrUnsupportedCarrier", err)
+	}
+	if _, err := tr.Track(context.Background(), "fake", "x"); !errors.Is(err, trackage.ErrUnsupportedCarrier) {
+		t.Errorf("Track: got %v, want ErrUnsupportedCarrier", err)
+	}
+}
+
+func TestNotFoundCauseForUnrelatedCode(t *testing.T) {
+	t.Parallel()
+	if got := notFoundCauseFor(-99999); got != nil {
+		t.Errorf("unrelated code → %v, want nil", got)
+	}
+}
+
+func TestNormalizeUnknownInfoCarrierFillsInteger(t *testing.T) {
+	t.Parallel()
+	// canon="" and code=0 → out.Carrier starts empty. info.Carrier is a
+	// non-zero code that's not in our table → the else-if branch fills
+	// out.Carrier with the integer string so the caller has something.
+	info := &trackAccepted{Number: "x", Carrier: 999999}
+	got := normalize("", "x", 0, info, nil)
+	if got.Carrier != "999999" {
+		t.Errorf("Carrier = %q, want \"999999\"", got.Carrier)
+	}
+}

@@ -136,9 +136,13 @@ func (t *Tracker) Track(ctx context.Context, carrier, number string) (*trackage.
 // native code, and we surface ErrUnsupportedCarrier rather than
 // silently falling through to auto-detect — which would discard the
 // caller's intent and obscure the typo.
+// lookupCarrier is a seam for tests; see the matching comment in
+// easypost.go. No real carrier in the table has SeventeenTrack==0.
+var lookupCarrier = trackage.LookupCarrier
+
 func (*Tracker) resolveCarrier(carrier, number string) (int, string, error) {
 	if carrier != "" {
-		if c, ok := trackage.LookupCarrier(carrier); ok {
+		if c, ok := lookupCarrier(carrier); ok {
 			if c.SeventeenTrack == 0 {
 				return 0, "", fmt.Errorf("17track: %w (%s)", trackage.ErrUnsupportedCarrier, carrier)
 			}
@@ -154,7 +158,7 @@ func (*Tracker) resolveCarrier(carrier, number string) (int, string, error) {
 		)
 	}
 	if id := trackage.DetectCarrier(number); id != "" {
-		if c, ok := trackage.LookupCarrier(id); ok && c.SeventeenTrack != 0 {
+		if c, ok := lookupCarrier(id); ok && c.SeventeenTrack != 0 {
 			return c.SeventeenTrack, c.ID, nil
 		}
 	}

@@ -143,6 +143,12 @@ type createReq struct {
 	Carrier      string `json:"carrier,omitempty"`
 }
 
+// lookupCarrier is a seam for tests: it defaults to trackage.LookupCarrier
+// but can be swapped so a unit test can drive resolveCarrier with a
+// Carrier whose EasyPost field is empty (no real carrier in the table
+// has that gap today).
+var lookupCarrier = trackage.LookupCarrier
+
 // resolveCarrier returns the EasyPost-native carrier code to send, or
 // "" if we should let EasyPost auto-detect. A canonical id whose
 // EasyPost column is empty triggers ErrUnsupportedCarrier so callers
@@ -150,7 +156,7 @@ type createReq struct {
 // silently falling through to EasyPost's guess.
 func (*Tracker) resolveCarrier(carrier, number string) (string, error) {
 	if carrier != "" {
-		if c, ok := trackage.LookupCarrier(carrier); ok {
+		if c, ok := lookupCarrier(carrier); ok {
 			if c.EasyPost == "" {
 				return "", fmt.Errorf("easypost: %w (%s)", trackage.ErrUnsupportedCarrier, carrier)
 			}
@@ -160,7 +166,7 @@ func (*Tracker) resolveCarrier(carrier, number string) (string, error) {
 		return carrier, nil
 	}
 	if id := trackage.DetectCarrier(number); id != "" {
-		if c, ok := trackage.LookupCarrier(id); ok && c.EasyPost != "" {
+		if c, ok := lookupCarrier(id); ok && c.EasyPost != "" {
 			return c.EasyPost, nil
 		}
 	}

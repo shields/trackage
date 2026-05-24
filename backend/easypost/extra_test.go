@@ -169,6 +169,61 @@ func TestNewRequestError(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // mutates package-level lookupCarrier
+func TestUnsupportedCanonicalCarrierRejected(t *testing.T) {
+	// Real carriers all have a non-empty EasyPost code, so swap the
+	// lookup seam to return a Carrier with that field blanked out.
+	orig := lookupCarrier
+	t.Cleanup(func() { lookupCarrier = orig })
+	lookupCarrier = func(id string) (trackage.Carrier, bool) {
+		return trackage.Carrier{ID: id}, true
+	}
+	tr := New(Config{APIKey: "k"})
+	if _, err := tr.resolveCarrier("fake", "x"); !errors.Is(err, trackage.ErrUnsupportedCarrier) {
+		t.Errorf("resolveCarrier: got %v, want ErrUnsupportedCarrier", err)
+	}
+	if _, err := tr.Track(context.Background(), "fake", "x"); !errors.Is(err, trackage.ErrUnsupportedCarrier) {
+		t.Errorf("Track: got %v, want ErrUnsupportedCarrier", err)
+	}
+}
+
+func TestParseEventTimeFallbacks(t *testing.T) {
+	t.Parallel()
+	// datetime_local with a real offset: parseTime handles it directly.
+	if got := parseEventTime("2026-05-21T09:23:47-07:00", ""); got.IsZero() {
+		t.Error("offset-bearing datetime_local should parse")
+	}
+	// datetime_local that's zoneless (T-separator, no offset): falls to the
+	// "2006-01-02T15:04:05" layout and is tagged with unknownZone.
+	got := parseEventTime("2026-05-21T09:23:47", "")
+	if got.IsZero() {
+		t.Fatal("zoneless T-separated should parse via fallback")
+	}
+	if got.Location().String() != "local" {
+		t.Errorf("zoneless should land in unknownZone (\"local\"), got %q", got.Location())
+	}
+	// Same shape but space-separated.
+	if got = parseEventTime("2026-05-21 09:23:47", ""); got.IsZero() {
+		t.Error("space-separated should parse via fallback")
+	}
+	// All datetime_local parses fail → zero time.
+	if got = parseEventTime("not a time", ""); !got.IsZero() {
+		t.Error("garbage datetime_local should return zero")
+	}
+	// datetime_local empty + datetime empty → zero.
+	if got = parseEventTime("", ""); !got.IsZero() {
+		t.Error("all empty → zero")
+	}
+	// Fallback to datetime with a real offset → returned as-is, no Z rewrite.
+	got = parseEventTime("", "2026-05-21T09:23:47-07:00")
+	if got.IsZero() {
+		t.Fatal("datetime with offset should parse")
+	}
+	if got.Location().String() == "local" {
+		t.Error("offset-bearing datetime should keep its zone, not unknownZone")
+	}
+}
+
 //nolint:paralleltest // mutates package-level marshalJSON
 func TestMarshalError(t *testing.T) {
 	orig := marshalJSON
