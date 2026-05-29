@@ -1,6 +1,6 @@
 module msrl.dev/trackage
 
-go 1.26
+go 1.26.3
 
 require (
 	github.com/BurntSushi/toml v1.6.0
@@ -70,7 +70,7 @@ require (
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
-	github.com/evilmartians/lefthook/v2 v2.1.8 // indirect
+	github.com/evilmartians/lefthook/v2 v2.1.9 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.6 // indirect
@@ -79,7 +79,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/ghostiam/protogetter v0.3.20 // indirect
 	github.com/go-critic/go-critic v0.14.3 // indirect
-	github.com/go-json-experiment/json v0.0.0-20260214004413-d219187c3433 // indirect
+	github.com/go-json-experiment/json v0.0.0-20260505212615-e40f80bf6836 // indirect
 	github.com/go-toolsmith/astcast v1.1.0 // indirect
 	github.com/go-toolsmith/astcopy v1.1.0 // indirect
 	github.com/go-toolsmith/astequal v1.2.0 // indirect
@@ -121,10 +121,10 @@ require (
 	github.com/jgautheron/goconst v1.10.0 // indirect
 	github.com/jjti/go-spancheck v0.6.5 // indirect
 	github.com/julz/importas v0.2.0 // indirect
-	github.com/kaptinlin/go-i18n v0.3.0 // indirect
-	github.com/kaptinlin/jsonpointer v0.4.17 // indirect
-	github.com/kaptinlin/jsonschema v0.7.7 // indirect
-	github.com/kaptinlin/messageformat-go v0.4.19 // indirect
+	github.com/kaptinlin/go-i18n v0.4.8 // indirect
+	github.com/kaptinlin/jsonpointer v0.4.23 // indirect
+	github.com/kaptinlin/jsonschema v0.7.14 // indirect
+	github.com/kaptinlin/messageformat-go v0.6.4 // indirect
 	github.com/karamaru-alpha/copyloopvar v1.2.2 // indirect
 	github.com/kisielk/errcheck v1.10.0 // indirect
 	github.com/kkHAIKE/contextcheck v1.1.6 // indirect
@@ -216,7 +216,7 @@ require (
 	github.com/tommy-muehle/go-mnd/v2 v2.5.1 // indirect
 	github.com/ultraware/funlen v0.2.0 // indirect
 	github.com/ultraware/whitespace v0.2.0 // indirect
-	github.com/urfave/cli/v3 v3.8.0 // indirect
+	github.com/urfave/cli/v3 v3.9.0 // indirect
 	github.com/uudashr/gocognit v1.2.1 // indirect
 	github.com/uudashr/iface v1.4.2 // indirect
 	github.com/xen0n/gosmopolitan v1.3.0 // indirect
@@ -236,10 +236,10 @@ require (
 	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.44.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/tools v0.44.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
-	gopkg.in/ini.v1 v1.67.1 // indirect
+	gopkg.in/ini.v1 v1.67.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.7.0 // indirect
