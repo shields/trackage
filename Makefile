@@ -55,10 +55,12 @@ lint-go:
 	  fi
 	$(GO) tool golangci-lint run ./...
 
+# `go mod tidy -diff` prints the needed changes and exits non-zero when
+# go.mod/go.sum are not tidy; run `make fmt` to apply them.
 lint-mod:
-	@$(GO) mod tidy -diff > /dev/null
+	$(GO) mod tidy -diff
 
-lint-md:
+lint-md: node_modules
 	bunx prettier --check '**/*.md'
 
 fmt: fmt-go fmt-md
@@ -67,8 +69,15 @@ fmt-go:
 	$(GO) tool gofumpt -w .
 	$(GO) mod tidy
 
-fmt-md:
+fmt-md: node_modules
 	bunx prettier --write '**/*.md'
+
+# Install the pinned Prettier (and any future dev deps) from the lockfile so
+# Markdown formatting is reproducible. --frozen-lockfile fails if package.json
+# and bun.lock have drifted out of sync.
+node_modules: package.json bun.lock
+	bun install --frozen-lockfile
+	@touch node_modules
 
 hooks:
 	$(GO) tool lefthook install
@@ -78,3 +87,4 @@ run:
 
 clean:
 	rm -f $(COVERAGE_FILE) trackage
+	rm -rf node_modules
