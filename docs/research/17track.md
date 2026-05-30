@@ -661,8 +661,13 @@ outcome), `401` auth/whitelist/disabled, `404` wrong URL, `429` rate limit,
 5. **No `/getcarrier`.** Auto-detect lives inside `/register`. Treat `origin: 3`
    (guess) as untrusted; verify via early events.
 6. **Records are scoped by `(number, carrier)`.** The same number registered to
-   two carriers is two records; `/gettrackinfo` always requires the carrier — no
-   "find any carrier for X" lookup.
+   two carriers is two records. But `/gettrackinfo` does not strictly require
+   the carrier: for a singly-registered number, omitting it returns the same
+   `accepted` record — with `carrier` filled in — as passing it explicitly
+   (verified live 2026-05-30 against a delivered UPS number, full event history
+   and all). The carrier still matters to pick between a number registered under
+   more than one (not retested here, but implied by the per-`(number, carrier)`
+   scoping).
 7. **Webhook signature is non-standard.** SHA-256 hex of `body + "/" + key`
    (v2/v2.2) or `event/data/key` (v1) — not HMAC. Use the help-centre sample
    code as the source of truth for the header name.
