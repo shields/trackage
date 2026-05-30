@@ -116,8 +116,10 @@ of its own:
   `https://trackage.invalid/<backend>` on stdin. Helpers ship pre-built for
   every major OS and store; we don't have to write OS-specific keychain code. If
   `creds_store` is unset, trackage auto-picks one by `runtime.GOOS`
-  (`osxkeychain` / `secretservice` / `wincred`); when that helper isn't on PATH
-  during `track`, the rung is treated as a miss and the chain continues. For
+  (`osxkeychain` / `secretservice` / `wincred`). During `track`, a missing
+  helper binary — whether `creds_store` was set explicitly or auto-detected — is
+  treated as a miss so the chain continues to the next rung; only other helper
+  errors (permission denied, non-zero exit, malformed output) bubble. For
   `login` / `logout` the user is explicitly asking to interact with a keychain,
   so a missing helper bubbles up as an error instead of being silently skipped.
 
