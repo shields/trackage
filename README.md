@@ -53,9 +53,11 @@ trackage backends             # supported backends and their API-key env vars
 trackage detect 1Z999…        # try the local carrier detector on a number
 ```
 
-Set `TRACKAGE_TRACE=1` to dump the raw HTTP request and response (curl-style,
-with `Authorization`, `Cookie`, and `Set-Cookie` redacted) to stderr for any
-upstream API call. Stdout is unchanged, so `--json | jq …` keeps working with
+Set `TRACKAGE_TRACE=1` to dump the raw HTTP request and response (curl-style) to
+stderr for any upstream API call. Every credential-bearing header is redacted:
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, and each
+backend's own auth header (17Track's `17token`, TrackingMore's
+`Tracking-Api-Key`). Stdout is unchanged, so `--json | jq …` keeps working with
 tracing on.
 
 Pass `--carrier=<id>` to force a carrier hint. Omitted, trackage detects the
