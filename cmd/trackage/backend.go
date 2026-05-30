@@ -118,11 +118,11 @@ func resolveBackend(ctx context.Context, flagBackend, flagAPIKey string, cfg con
 //
 //  1. --api-key flag (flagVal)
 //  2. <BACKEND>_API_KEY env var (envKey)
-//  3. docker-credential-<creds_store> get
-//     – cfg.CredsStore set → strict; any helper error bubbles.
-//     – cfg.CredsStore unset → try the OS default (defaultCredsStore);
-//     PATH-miss is treated as a miss so the chain continues, but
-//     non-PATH errors still bubble.
+//  3. docker-credential-<creds_store> get, using cfg.CredsStore when set
+//     or the OS default (defaultCredsStore) otherwise. In both cases a
+//     PATH-miss (helper binary not installed) is treated as a miss so the
+//     chain continues, while any other helper error bubbles. See
+//     tryCredsStore for the rationale.
 //  4. api_keys.<backendName> in config.toml
 //
 // On miss it returns an errNoAPIKey enumerating every configured source.
@@ -188,9 +188,16 @@ const (
 )
 
 // listKeysInCredStore runs `docker-credential-<store> list` once and
-// returns the URL→username map, applying the same strict-vs-lenient
-// policy as tryCredsStore: explicit cfg.CredsStore propagates errors,
-// the OS auto-detect treats a missing helper as "no keys available."
+// returns the URL→username map. An explicitly configured cfg.CredsStore
+// propagates every helper error (including a PATH-miss); the OS
+// auto-detect path treats a missing helper as "no keys available" and
+// returns an empty map.
+//
+// This differs from tryCredsStore, which swallows a PATH-miss even for an
+// explicit cfg.CredsStore. The asymmetry is intentional: the only caller,
+// `trackage backends`, downgrades a returned error to a non-fatal warning
+// and still renders the table, so surfacing "your configured helper isn't
+// installed" is useful here rather than silently masked.
 //
 // An empty (non-nil) map is returned when no helper is reachable so
 // callers can use the result directly without nil-checking.
