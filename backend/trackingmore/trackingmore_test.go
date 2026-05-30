@@ -35,7 +35,7 @@ const itemDeliveredJSON = `{
     "delivery_status": "delivered",
     "substatus": "delivered001",
     "created_at": "2015-10-30T11:35:16+08:00",
-    "update_at": "2015-11-03T13:47:20+08:00",
+    "updated_at": "2015-11-03T13:47:20+08:00",
     "destination_country": "US",
     "latest_event": "Delivered,RENTON, WA 98056,2015-11-02 17:11",
     "latest_checkpoint_time": "2015-11-02T17:11:00",

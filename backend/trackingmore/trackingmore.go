@@ -521,16 +521,16 @@ func parseTime(opts ...string) time.Time {
 		if s == "" {
 			continue
 		}
-		for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02"} {
+		for _, layout := range []string{time.RFC3339Nano, "2006-01-02"} {
 			if t, err := time.Parse(layout, s); err == nil {
 				return t
 			}
 		}
+		// The .999999999 layouts also match values with no fractional second,
+		// so separate bare-second layouts would be redundant.
 		for _, layout := range []string{
 			"2006-01-02T15:04:05.999999999",
 			"2006-01-02 15:04:05.999999999",
-			"2006-01-02T15:04:05",
-			"2006-01-02 15:04:05",
 			"2006-01-02 15:04",
 		} {
 			if t, err := time.ParseInLocation(layout, s, unknownZone); err == nil {
