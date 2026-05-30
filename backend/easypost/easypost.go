@@ -365,9 +365,9 @@ func firstNonEmpty(opts ...string) string {
 //	error                → exception
 //	unknown / other      → unknown
 //
-// keep both spellings in the switch so canonicalization is robust.
+// Both spellings are kept in the switch so canonicalization is robust.
 //
-//nolint:misspell // EasyPost emits the British spelling "cancelled"; we
+//nolint:misspell // EasyPost emits the British spelling "cancelled".
 func mapStatus(s string) trackage.Status {
 	switch strings.ToLower(s) {
 	case "pre_transit":
