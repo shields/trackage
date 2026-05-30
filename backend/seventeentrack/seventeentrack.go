@@ -140,6 +140,10 @@ func (t *Tracker) Track(ctx context.Context, carrier, number string) (*trackage.
 	return normalize(canon, number, code, info, raw), nil
 }
 
+// lookupCarrier is a seam for tests; see the matching comment in
+// easypost.go. No real carrier in the table has SeventeenTrack==0.
+var lookupCarrier = trackage.LookupCarrier
+
 // resolveCarrier returns the 17Track integer carrier code (0 means
 // "auto-detect / not specified") and the canonical trackage id we'll
 // stamp on the resulting Tracking.
@@ -150,10 +154,6 @@ func (t *Tracker) Track(ctx context.Context, carrier, number string) (*trackage.
 // native code, and we surface ErrUnsupportedCarrier rather than
 // silently falling through to auto-detect — which would discard the
 // caller's intent and obscure the typo.
-// lookupCarrier is a seam for tests; see the matching comment in
-// easypost.go. No real carrier in the table has SeventeenTrack==0.
-var lookupCarrier = trackage.LookupCarrier
-
 func (*Tracker) resolveCarrier(carrier, number string) (int, string, error) {
 	if carrier != "" {
 		if c, ok := lookupCarrier(carrier); ok {
