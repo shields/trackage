@@ -226,9 +226,10 @@ func normalize(userCarrier, shippoCode string, r *response, raw []byte) *trackag
 		canon = c.ID
 	} else {
 		// userCarrier was a backend-native token; try to find a canonical
-		// id that maps to the same Shippo code. Match case-insensitively
-		// so callers can pass either "USPS" (Shippo's preferred casing)
-		// or "usps".
+		// id that maps to the same Shippo code. Shippo's own tokens are
+		// lowercase snake_case ("usps", "dhl_express"), but compare
+		// case-insensitively so a caller who typed an odd casing still
+		// recovers the canonical id.
 		for _, c := range trackage.AllCarriers() {
 			if strings.EqualFold(c.Shippo, shippoCode) {
 				canon = c.ID
@@ -312,7 +313,7 @@ func parseTime(s string) time.Time {
 	if s == "" {
 		return time.Time{}
 	}
-	for _, layout := range []string{time.RFC3339Nano, time.RFC3339, "2006-01-02T15:04:05Z"} {
+	for _, layout := range []string{time.RFC3339Nano, time.RFC3339} {
 		if t, err := time.Parse(layout, s); err == nil {
 			return t
 		}
