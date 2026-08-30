@@ -17,7 +17,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -121,7 +121,7 @@ func isHelperMissing(err error) bool {
 
 // marshalJSON is the seam tests use to exercise the otherwise
 // unreachable encoding error path inside storeInCredStore.
-var marshalJSON = json.Marshal
+var marshalJSON = func(v any) ([]byte, error) { return json.Marshal(v) }
 
 // credstoreCredential is the JSON shape every Docker credential helper
 // reads on `store` input and writes on `get` output.
@@ -312,8 +312,7 @@ func missSentinelInBuffers(stdout, stderr *bytes.Buffer) bool {
 // errors.Is(err, sentinel) AND errors.As(err, &exec.ExitError{}) on the
 // same value.
 func wrapHelperRunErr(sentinel error, binary, action, serviceURL string, stderr *bytes.Buffer, runErr error) error {
-	var execErr *exec.Error
-	if errors.As(runErr, &execErr) {
+	if execErr, ok := errors.AsType[*exec.Error](runErr); ok && execErr != nil {
 		return fmt.Errorf("trackage: %s not found on PATH: %w", binary, runErr)
 	}
 	msg := strings.TrimSpace(stderr.String())

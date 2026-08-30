@@ -27,7 +27,8 @@ package shippo
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"net/http"
@@ -242,7 +243,7 @@ func normalize(userCarrier, shippoCode string, r *response, raw []byte) *trackag
 		Carrier:        canon,
 		TrackingNumber: r.TrackingNumber,
 		Status:         trackage.StatusUnknown,
-		Raw:            json.RawMessage(raw),
+		Raw:            jsontext.Value(raw),
 	}
 
 	if r.TrackingStatus != nil {

@@ -15,7 +15,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -37,9 +36,7 @@ func newDetectCmd() *cobra.Command {
 					"tracking_number": number,
 					"carrier":         id,
 				}
-				enc := json.NewEncoder(out)
-				enc.SetIndent("", "  ")
-				return enc.Encode(payload)
+				return writeJSON(out, payload)
 			}
 			if id == "" {
 				_, err := fmt.Fprintf(out, "%s: no match (let the backend auto-detect)\n", number)

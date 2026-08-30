@@ -15,7 +15,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"text/tabwriter"
@@ -32,9 +31,7 @@ func newCarriersCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			out := cmd.OutOrStdout()
 			if boolFlag(cmd, "json") {
-				enc := json.NewEncoder(out)
-				enc.SetIndent("", "  ")
-				return enc.Encode(trackage.AllCarriers())
+				return writeJSON(out, trackage.AllCarriers())
 			}
 			w := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
 			//nolint:errcheck // tabwriter writes are inactionable

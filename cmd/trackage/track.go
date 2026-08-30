@@ -15,7 +15,8 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -68,10 +69,10 @@ otherwise.`,
 	return cmd
 }
 
-func writeJSON(w io.Writer, t *trackage.Tracking) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-	return enc.Encode(t)
+func writeJSON(w io.Writer, v any) error {
+	enc := jsontext.NewEncoder(w, jsontext.Multiline(true), jsontext.WithIndent("  "))
+	// Keep user-facing JSON stable when a command's payload contains maps.
+	return json.MarshalEncode(enc, v, json.Deterministic(true))
 }
 
 func writePretty(w io.Writer, backend string, t *trackage.Tracking) error {

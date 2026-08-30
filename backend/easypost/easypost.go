@@ -32,7 +32,8 @@ package easypost
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"net/http"
@@ -56,7 +57,7 @@ const (
 // marshalJSON is the package's seam for json.Marshal so tests can
 // exercise the otherwise-unreachable encoding error path. Marshal of
 // our fixed request struct cannot fail in normal use.
-var marshalJSON = json.Marshal
+var marshalJSON = func(v any) ([]byte, error) { return json.Marshal(v) }
 
 // unknownZone tags a wall-clock value EasyPost surfaced via the
 // datetime field without a corresponding datetime_local. We do not use
@@ -247,7 +248,7 @@ func normalize(userCarrier string, tr *tracker, raw []byte) *trackage.Tracking {
 		TrackingNumber: tr.TrackingCode,
 		Status:         mapStatus(tr.Status),
 		Substatus:      tr.StatusDetail,
-		Raw:            json.RawMessage(raw),
+		Raw:            jsontext.Value(raw),
 	}
 
 	if t := parseTime(tr.UpdatedAt); !t.IsZero() {

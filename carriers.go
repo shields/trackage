@@ -46,7 +46,7 @@ type Carrier struct {
 	Name           string `json:"name"`
 	Shippo         string `json:"shippo,omitempty"`
 	EasyPost       string `json:"easypost,omitempty"`
-	SeventeenTrack int    `json:"17track,omitempty"`
+	SeventeenTrack int    `json:"17track,omitzero"`
 	TrackingMore   string `json:"trackingmore,omitempty"`
 }
 

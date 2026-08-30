@@ -44,7 +44,7 @@ const credHelperModeEnv = "TRACKAGE_FAKE_CRED_HELPER"
 
 func TestMain(m *testing.M) {
 	if mode := os.Getenv(credHelperModeEnv); mode != "" {
-		os.Exit(runFakeCredHelper(mode)) //nolint:revive // fake-helper dispatch into the test binary
+		os.Exit(runFakeCredHelper(mode)) //nolint:revive,nolintlint // fake-helper dispatch into the test binary
 	}
 	m.Run()
 }

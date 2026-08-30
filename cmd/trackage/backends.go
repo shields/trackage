@@ -15,7 +15,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"text/tabwriter"
 
@@ -52,9 +51,7 @@ func newBackendsCmd(cfg config) *cobra.Command {
 
 			out := cmd.OutOrStdout()
 			if boolFlag(cmd, "json") {
-				enc := json.NewEncoder(out)
-				enc.SetIndent("", "  ")
-				return enc.Encode(rows)
+				return writeJSON(out, rows)
 			}
 			w := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
 			//nolint:errcheck // tabwriter writes are inactionable

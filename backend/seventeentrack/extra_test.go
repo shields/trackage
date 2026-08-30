@@ -16,6 +16,7 @@ package seventeentrack
 
 import (
 	"context"
+	"encoding/json/v2"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -29,6 +30,26 @@ func TestName(t *testing.T) {
 	t.Parallel()
 	if got := (&Tracker{}).Name(); got != "17track" {
 		t.Errorf("Name = %q", got)
+	}
+}
+
+func TestRequestCarrierOmitZero(t *testing.T) {
+	t.Parallel()
+	for name, request := range map[string]any{
+		"register":   registerItem{Number: "x", AutoDetection: true},
+		"track info": trackInfoItem{Number: "x"},
+	} {
+		data, err := json.Marshal(request)
+		if err != nil {
+			t.Fatalf("%s: Marshal: %v", name, err)
+		}
+		var object map[string]any
+		if err := json.Unmarshal(data, &object); err != nil {
+			t.Fatalf("%s: Unmarshal: %v", name, err)
+		}
+		if _, ok := object["carrier"]; ok {
+			t.Errorf("%s: zero carrier was not omitted: %s", name, data)
+		}
 	}
 }
 

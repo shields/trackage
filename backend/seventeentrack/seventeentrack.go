@@ -37,7 +37,8 @@ package seventeentrack
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"fmt"
 	"io"
 	"net/http"
@@ -82,7 +83,7 @@ const (
 
 // marshalJSON is the package's seam for json.Marshal so tests can
 // exercise the otherwise-unreachable encoding error path.
-var marshalJSON = json.Marshal
+var marshalJSON = func(v any) ([]byte, error) { return json.Marshal(v) }
 
 // Config configures a 17Track tracker.
 type Config struct {
@@ -181,13 +182,13 @@ func (*Tracker) resolveCarrier(carrier, number string) (int, string, error) {
 
 type registerItem struct {
 	Number        string `json:"number"`
-	Carrier       int    `json:"carrier,omitempty"`
+	Carrier       int    `json:"carrier,omitzero"`
 	AutoDetection bool   `json:"auto_detection"`
 }
 
 type trackInfoItem struct {
 	Number  string `json:"number"`
-	Carrier int    `json:"carrier,omitempty"`
+	Carrier int    `json:"carrier,omitzero"`
 }
 
 func (t *Tracker) register(ctx context.Context, code int, number string) error {
@@ -235,7 +236,7 @@ func notFoundCauseFor(code int) error {
 	return nil
 }
 
-func (t *Tracker) getInfo(ctx context.Context, code int, number string) (*trackAccepted, json.RawMessage, error) {
+func (t *Tracker) getInfo(ctx context.Context, code int, number string) (*trackAccepted, jsontext.Value, error) {
 	body := []trackInfoItem{{Number: number, Carrier: code}}
 	resp, raw, err := t.postJSONRaw(ctx, "/track/v2.2/gettrackinfo", body)
 	if err != nil {
@@ -268,7 +269,7 @@ func (t *Tracker) postJSON(ctx context.Context, path string, body any, out *enve
 	return nil
 }
 
-func (t *Tracker) postJSONRaw(ctx context.Context, path string, body any) (envelope, json.RawMessage, error) {
+func (t *Tracker) postJSONRaw(ctx context.Context, path string, body any) (envelope, jsontext.Value, error) {
 	enc, err := marshalJSON(body)
 	if err != nil {
 		return envelope{}, nil, err
@@ -425,7 +426,7 @@ type providerInfo struct {
 	Name string `json:"name"`
 }
 
-func normalize(canon, number string, code int, info *trackAccepted, raw json.RawMessage) *trackage.Tracking {
+func normalize(canon, number string, code int, info *trackAccepted, raw jsontext.Value) *trackage.Tracking {
 	// Prefer the canonical-table translation of the resolved code over
 	// the raw user input — so a caller who passed a numeric string like
 	// "21051" still gets Tracking.Carrier="usps" rather than the integer.

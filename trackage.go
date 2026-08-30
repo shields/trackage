@@ -16,7 +16,7 @@ package trackage
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"strconv"
 	"time"
@@ -81,15 +81,15 @@ func AllStatuses() []Status {
 //   - Raw is the upstream JSON body verbatim, for callers that need a
 //     field trackage did not surface.
 type Tracking struct {
-	Carrier        string          `json:"carrier"`
-	TrackingNumber string          `json:"tracking_number"`
-	Status         Status          `json:"status"`
-	Substatus      string          `json:"substatus,omitempty"`
-	Description    string          `json:"description,omitempty"`
-	LastUpdate     time.Time       `json:"last_update,omitzero"`
-	EstDelivery    *time.Time      `json:"est_delivery,omitempty"`
-	Events         []Event         `json:"events,omitempty"`
-	Raw            json.RawMessage `json:"raw,omitempty"`
+	Carrier        string         `json:"carrier"`
+	TrackingNumber string         `json:"tracking_number"`
+	Status         Status         `json:"status"`
+	Substatus      string         `json:"substatus,omitempty"`
+	Description    string         `json:"description,omitempty"`
+	LastUpdate     time.Time      `json:"last_update,omitzero"`
+	EstDelivery    *time.Time     `json:"est_delivery,omitempty"`
+	Events         []Event        `json:"events,omitempty"`
+	Raw            jsontext.Value `json:"raw,omitempty"`
 }
 
 // Event is a single carrier checkpoint.

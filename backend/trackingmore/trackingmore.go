@@ -32,7 +32,8 @@ package trackingmore
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"io"
@@ -74,8 +75,9 @@ const (
 )
 
 // marshalJSON is the package's seam for json.Marshal so tests can
-// exercise the otherwise-unreachable encoding error path.
-var marshalJSON = json.Marshal
+// exercise the otherwise-unreachable encoding error path. Deterministic
+// preserves v1's stable ordering for the map-backed create request.
+var marshalJSON = func(v any) ([]byte, error) { return json.Marshal(v, json.Deterministic(true)) }
 
 // unknownZone tags a wall-clock value the carrier supplied without a
 // timezone. We deliberately do not use time.Local — time.Parse returns
@@ -177,7 +179,7 @@ func (*Tracker) resolveCarrier(carrier, number string) (string, error) {
 	return "", nil
 }
 
-func (t *Tracker) create(ctx context.Context, courier, number string) (*trackingItem, json.RawMessage, error) {
+func (t *Tracker) create(ctx context.Context, courier, number string) (*trackingItem, jsontext.Value, error) {
 	body := map[string]string{
 		"tracking_number": number,
 	}
@@ -202,7 +204,7 @@ func (t *Tracker) create(ctx context.Context, courier, number string) (*tracking
 	return &item, r.raw, nil
 }
 
-func (t *Tracker) get(ctx context.Context, courier, number string) (*trackingItem, json.RawMessage, error) {
+func (t *Tracker) get(ctx context.Context, courier, number string) (*trackingItem, jsontext.Value, error) {
 	q := url.Values{}
 	q.Set("tracking_numbers", number)
 	if courier != "" {
@@ -246,7 +248,7 @@ func (t *Tracker) request(ctx context.Context, method, path string, body io.Read
 // callers don't have to juggle four return values.
 type rawResp struct {
 	status int
-	raw    json.RawMessage
+	raw    jsontext.Value
 	env    envelope
 }
 
@@ -306,8 +308,8 @@ func metaCodeString(env envelope) string {
 }
 
 type envelope struct {
-	Meta meta            `json:"meta"`
-	Data json.RawMessage `json:"data"`
+	Meta meta           `json:"meta"`
+	Data jsontext.Value `json:"data"`
 }
 
 type meta struct {
@@ -382,7 +384,7 @@ type checkpoint struct {
 	Substatus                   string `json:"substatus"`
 }
 
-func normalize(userCarrier string, item *trackingItem, raw json.RawMessage) *trackage.Tracking {
+func normalize(userCarrier string, item *trackingItem, raw jsontext.Value) *trackage.Tracking {
 	canon := canonicalCarrier(userCarrier, item)
 
 	out := &trackage.Tracking{

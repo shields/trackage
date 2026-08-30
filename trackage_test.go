@@ -15,6 +15,8 @@
 package trackage
 
 import (
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"testing"
 )
@@ -87,5 +89,35 @@ func TestLookupAndAllCarriers(t *testing.T) {
 	again := AllCarriers()
 	if again[0].ID == "mutated" {
 		t.Error("AllCarriers returned a live reference, not a copy")
+	}
+}
+
+func TestJSONV2Representation(t *testing.T) {
+	t.Parallel()
+
+	data, err := json.Marshal(Tracking{Raw: jsontext.Value(`{"upstream":true}`)})
+	if err != nil {
+		t.Fatalf("Marshal Tracking: %v", err)
+	}
+	var trackingObject map[string]jsontext.Value
+	err = json.Unmarshal(data, &trackingObject)
+	if err != nil {
+		t.Fatalf("Unmarshal Tracking JSON: %v", err)
+	}
+	if got := string(trackingObject["raw"]); got != `{"upstream":true}` {
+		t.Errorf("raw = %s, want embedded JSON object", got)
+	}
+
+	data, err = json.Marshal(Carrier{ID: "unmapped", Name: "Unmapped"})
+	if err != nil {
+		t.Fatalf("Marshal Carrier: %v", err)
+	}
+	var carrierObject map[string]jsontext.Value
+	err = json.Unmarshal(data, &carrierObject)
+	if err != nil {
+		t.Fatalf("Unmarshal Carrier JSON: %v", err)
+	}
+	if _, ok := carrierObject["17track"]; ok {
+		t.Errorf("zero 17track code was not omitted: %s", data)
 	}
 }
