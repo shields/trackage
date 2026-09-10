@@ -467,9 +467,7 @@ required/invalid/test-failed/not-set.
     "number": "RR123456789CN",
     "carrier": 3011,
     "tag": null,
-    "track_info": {
-      /* same shape as gettrackinfo */
-    }
+    "track_info": {/* same shape as gettrackinfo */}
   }
 }
 ```
