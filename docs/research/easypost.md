@@ -320,9 +320,7 @@ names, ASCII <1000 chars).
     "object": "Tracker",
     "id": "trk_...",
     "status": "in_transit",
-    "tracking_details": [
-      /* … */
-    ]
+    "tracking_details": [/* … */]
   },
   "pending_urls": [],
   "completed_urls": [],

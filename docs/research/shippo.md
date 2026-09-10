@@ -513,10 +513,11 @@ From <https://goshippo.com/pricing/api>:
 - **API Premier**: custom/enterprise — contact sales.
 - **Labels bought through Shippo**: tracking on those labels is automatic and
   not separately metered for the lifetime of the shipment.
-- A widely-cited older quote of **$0.01 per unique tracking number created
+- A widely-cited older quote of
+  **$0.01 per unique tracking number created
   outside of Shippo** appears in third-party summaries; the current pricing page
-  reflects $0.02. Cite the live pricing page in our docs rather than the old
-  number.
+  reflects $0.02.
+  Cite the live pricing page in our docs rather than the old number.
 
 There is no documented free tier for external tracking; **test mode is always
 free** with a `shippo_test_` key.
