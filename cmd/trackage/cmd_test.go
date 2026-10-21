@@ -396,10 +396,11 @@ func TestFormatTime(t *testing.T) {
 func TestWritePrettyMinimal(t *testing.T) {
 	t.Parallel()
 	var buf bytes.Buffer
-	if err := writePretty(&buf, "fake", &trackage.Tracking{
+	tracking := &trackage.Tracking{
 		TrackingNumber: "abc",
 		Status:         trackage.StatusUnknown,
-	}); err != nil {
+	}
+	if err := writePretty(&buf, "fake", tracking); err != nil {
 		t.Fatalf("writePretty: %v", err)
 	}
 	if !strings.Contains(buf.String(), "abc") {
