@@ -44,7 +44,7 @@ coverage-check: coverage
 	@LC_ALL=C awk 'NR>1{t+=$$2;if($$3>0)c+=$$2} \
 	  END{if(c!=t){print "FAIL: coverage is not 100.0%"; exit 1}}' $(COVERAGE_FILE)
 
-lint: lint-go lint-mod lint-md
+lint: actions-lock-verify-local lint-go lint-mod lint-md
 
 lint-go:
 	@diff=$$($(GO) tool gofumpt -d .); \
@@ -88,3 +88,17 @@ run:
 clean:
 	rm -f $(COVERAGE_FILE) trackage
 	rm -rf node_modules
+
+.PHONY: actions-lock-install actions-lock actions-lock-verify-local actions-lock-verify
+
+actions-lock-install:
+	gh extension install github/gh-actions-lock --pin v0.4.1 --force
+
+actions-lock:
+	gh actions-lock --no-interactive
+
+actions-lock-verify-local:
+	gh actions-lock --verify-local
+
+actions-lock-verify:
+	gh actions-lock --verify
