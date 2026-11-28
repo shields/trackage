@@ -78,7 +78,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - uses: gitcalver/sh@v20261007.1
+      - uses: gitcalver/sh@v20261128.2
         id: version
         if: steps.tip.outputs.current == 'true'
         with:
