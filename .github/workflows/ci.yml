@@ -86,15 +86,11 @@ jobs:
           branch: main
           tag: "true"
 
-      - name: Prime the module proxy and checksum database
+      # A cache warm only: if it fails, the proxy picks up the tag later.
+      - name: Prime the module proxy
         if: steps.tip.outputs.current == 'true'
+        continue-on-error: true
         env:
           TAG: ${{ steps.version.outputs.tag }}
-        run: |
-          info=$(curl --fail --silent --show-error --retry 5 --retry-all-errors \
-            "https://proxy.golang.org/msrl.dev/trackage/@v/$TAG.info")
-          version=$(jq -r .Version <<<"$info")
-          [[ "$version" == "$TAG" ]] || { echo "proxy returned $version, want $TAG"; exit 1; }
-          curl --fail --silent --show-error --retry 5 --retry-all-errors \
-            "https://sum.golang.org/lookup/msrl.dev/trackage@$TAG"
+        run: curl --fail --silent --show-error "https://proxy.golang.org/msrl.dev/trackage/@v/$TAG.info"
     name: tag
