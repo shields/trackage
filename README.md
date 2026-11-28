@@ -25,6 +25,10 @@ behind a single interface. Supports Shippo, EasyPost, 17Track, and TrackingMore.
 go install msrl.dev/trackage/cmd/trackage@latest
 ```
 
+A commit that passes CI while still the tip of main is tagged `v0.YYYYMMDD.N`
+([GitCalVer](https://gitcalver.org)), so `@latest` is a tested commit at or near
+the tip of main.
+
 ## Quick start
 
 ```sh

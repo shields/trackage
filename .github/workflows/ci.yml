@@ -48,3 +48,53 @@ jobs:
 
       - run: make coverage-check
     name: test
+
+  # The v0. prefix makes each GitCalVer version a semver release tag, which
+  # `go get` needs, without the /vN module-path suffix v2+ would require.
+  tag:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # Pushes the release tag.
+    steps:
+      # gitcalver refuses to tag anything but the branch tip, so a run that a
+      # later push has overtaken skips tagging.
+      - id: tip
+        run: |
+          head=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [[ "$head" == "$GITHUB_SHA" ]]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "Skipping $GITHUB_SHA because main now points to $head."
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - uses: actions/checkout@v7.0.1 # zizmor: ignore[artipacked] gitcalver pushes the tag with the checkout credential.
+        if: steps.tip.outputs.current == 'true'
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - uses: gitcalver/sh@v20261007.1
+        id: version
+        if: steps.tip.outputs.current == 'true'
+        with:
+          prefix: v0.
+          branch: main
+          tag: "true"
+
+      - name: Prime the module proxy and checksum database
+        if: steps.tip.outputs.current == 'true'
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          info=$(curl --fail --silent --show-error --retry 5 --retry-all-errors \
+            "https://proxy.golang.org/msrl.dev/trackage/@v/$TAG.info")
+          version=$(jq -r .Version <<<"$info")
+          [[ "$version" == "$TAG" ]] || { echo "proxy returned $version, want $TAG"; exit 1; }
+          curl --fail --silent --show-error --retry 5 --retry-all-errors \
+            "https://sum.golang.org/lookup/msrl.dev/trackage@$TAG"
+    name: tag
